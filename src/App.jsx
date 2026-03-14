@@ -138,15 +138,6 @@ const App = () => {
         <>
             <header className="header glass-panel">
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
-                    {installPrompt && (
-                        <button
-                            onClick={handleInstall}
-                            title="Instalar Aplicación"
-                            style={{ position: 'absolute', left: 0, padding: '6px 10px', border: '1px solid var(--accent-color)', background: 'var(--panel-bg)', color: 'var(--accent-color)', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: 4 }}
-                        >
-                            <Download size={14} /> Instalar
-                        </button>
-                    )}
                     <h1><ShoppingCart style={{ marginRight: 8, verticalAlign: 'middle' }} />Carrito Caracas</h1>
                     <button
                         onClick={clearData}
@@ -241,7 +232,38 @@ const App = () => {
         .spin { animation: spin 1s linear infinite; }
         @keyframes spin { from {transform: rotate(0deg)} to {transform: rotate(360deg)} }
         .dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); }
+        .install-fab {
+          position: fixed;
+          bottom: 120px;
+          right: 20px;
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          background: var(--accent-color);
+          color: white;
+          border: none;
+          box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 100;
+          animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+          40% {transform: translateY(-10px);}
+          60% {transform: translateY(-5px);}
+        }
       `}</style>
+            {installPrompt && (
+                <button
+                    className="install-fab"
+                    onClick={handleInstall}
+                    title="Instalar Aplicación"
+                >
+                    <Download size={24} />
+                </button>
+            )}
         </>
     );
 };
