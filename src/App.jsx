@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Plus, RefreshCw, ShoppingCart, FileText, Eraser } from 'lucide-react';
+import { Trash2, Plus, RefreshCw, ShoppingCart, FileText, Eraser, Download } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import './index.css';
@@ -9,13 +9,29 @@ const App = () => {
     const [rate, setRate] = useState(0);
     const [isSyncing, setIsSyncing] = useState(true);
     const [form, setForm] = useState({ name: '', quantity: 1, price: '' });
+    const [installPrompt, setInstallPrompt] = useState(null);
 
     // Persistence
     useEffect(() => {
         const saved = localStorage.getItem('carrito-ccs-products');
         if (saved) setProducts(JSON.parse(saved));
         fetchRate();
+
+        // Listen for PWA install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            setInstallPrompt(e);
+        });
     }, []);
+
+    const handleInstall = async () => {
+        if (!installPrompt) return;
+        installPrompt.prompt();
+        const { outcome } = await installPrompt.userChoice;
+        if (outcome === 'accepted') {
+            setInstallPrompt(null);
+        }
+    };
 
     useEffect(() => {
         localStorage.setItem('carrito-ccs-products', JSON.stringify(products));
@@ -122,6 +138,15 @@ const App = () => {
         <>
             <header className="header glass-panel">
                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                    {installPrompt && (
+                        <button
+                            onClick={handleInstall}
+                            title="Instalar Aplicación"
+                            style={{ position: 'absolute', left: 0, padding: '6px 10px', border: '1px solid var(--accent-color)', background: 'var(--panel-bg)', color: 'var(--accent-color)', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: 4 }}
+                        >
+                            <Download size={14} /> Instalar
+                        </button>
+                    )}
                     <h1><ShoppingCart style={{ marginRight: 8, verticalAlign: 'middle' }} />Carrito Caracas</h1>
                     <button
                         onClick={clearData}
