@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Plus, RefreshCw, ShoppingCart } from 'lucide-react';
+import { Trash2, Plus, RefreshCw, ShoppingCart, FileText, Eraser } from 'lucide-react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import './index.css';
 
 const App = () => {
@@ -22,7 +24,6 @@ const App = () => {
     const fetchRate = async () => {
         setIsSyncing(true);
         try {
-            // DolarApi as primary source for BCV rate
             const res = await fetch('https://ve.dolarapi.com/v1/dolares/oficial');
             const data = await res.json();
             if (data && data.promedio) {
@@ -32,7 +33,6 @@ const App = () => {
             }
         } catch (err) {
             console.error('API Error, using manual fallback', err);
-            // Hardcoded fallback or manual input could go here
             const manual = prompt('Error sincronizando BCV. Ingrese tasa manual:', '60.00');
             setRate(parseFloat(manual) || 60);
         } finally {
@@ -59,13 +59,78 @@ const App = () => {
         setProducts(products.filter(p => p.id !== id));
     };
 
+    const clearData = () => {
+        if (window.confirm('¿Está seguro de que desea borrar toda la lista?')) {
+            setProducts([]);
+        }
+    };
+
+    const exportPDF = () => {
+        if (products.length === 0) {
+            alert('No hay productos para exportar.');
+            return;
+        }
+
+        const doc = new jsPDF();
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('es-VE') + ' ' + now.toLocaleTimeString('es-VE');
+
+        // Header
+        doc.setFontSize(18);
+        doc.setTextColor(5, 150, 105); // #059669
+        doc.text('Carrito Caracas - Reporte de Mercado', 14, 22);
+
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Fecha: ${dateStr}`, 14, 30);
+        doc.text(`Tasa BCV: ${rate.toFixed(2)} Bs/$`, 14, 35);
+
+        // Table
+        const tableData = products.map(p => [
+            p.name,
+            p.quantity.toString(),
+            `$${p.priceUSD.toFixed(2)}`,
+            `$${(p.priceUSD * p.quantity).toFixed(2)}`,
+            `Bs. ${((p.priceUSD * p.quantity) * rate).toLocaleString('es-VE', { minimumFractionDigits: 2 })}`
+        ]);
+
+        autoTable(doc, {
+            startY: 45,
+            head: [['Producto', 'Cant.', 'Precio Unit.', 'Total USD', 'Total Bs.']],
+            body: tableData,
+            theme: 'striped',
+            headStyles: { fillColor: [5, 150, 105] },
+        });
+
+        const finalY = doc.lastAutoTable.finalY || 45;
+        const totalUSD = products.reduce((acc, p) => acc + (p.priceUSD * p.quantity), 0);
+        const totalVES = totalUSD * rate;
+
+        // Totals area
+        doc.setFontSize(12);
+        doc.setTextColor(0);
+        doc.text(`TOTAL USD: $${totalUSD.toFixed(2)}`, 14, finalY + 15);
+        doc.text(`TOTAL BS: Bs. ${totalVES.toLocaleString('es-VE', { minimumFractionDigits: 2 })}`, 14, finalY + 22);
+
+        doc.save(`carrito-ccs-${now.getTime()}.pdf`);
+    };
+
     const totalUSD = products.reduce((acc, p) => acc + (p.priceUSD * p.quantity), 0);
     const totalVES = totalUSD * rate;
 
     return (
         <>
             <header className="header glass-panel">
-                <h1><ShoppingCart style={{ marginRight: 8, verticalAlign: 'middle' }} />Carrito Caracas</h1>
+                <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+                    <h1><ShoppingCart style={{ marginRight: 8, verticalAlign: 'middle' }} />Carrito Caracas</h1>
+                    <button
+                        onClick={clearData}
+                        title="Borrar todo"
+                        style={{ position: 'absolute', right: 0, padding: 8, border: 'none', background: 'transparent', color: 'var(--danger)' }}
+                    >
+                        <Eraser size={20} />
+                    </button>
+                </div>
                 <div className={`rate-badge ${isSyncing ? 'syncing' : 'synced'}`}>
                     {isSyncing ? <RefreshCw className="spin" size={14} /> : <div className="dot" />}
                     Tasa BCV: <strong>{rate.toFixed(2)} Bs/$</strong>
@@ -114,7 +179,7 @@ const App = () => {
                             </div>
                             <button
                                 onClick={() => removeProduct(p.id)}
-                                style={{ marginLeft: 16, padding: 8, color: 'var(--danger)' }}
+                                style={{ marginLeft: 16, padding: 8, color: 'var(--danger)', border: 'none', background: 'transparent' }}
                             >
                                 <Trash2 size={18} />
                             </button>
@@ -128,14 +193,23 @@ const App = () => {
                 </div>
             </main>
 
-            <footer className="totals-footer glass-panel" style={{ backgroundColor: 'var(--panel-bg)' }}>
-                <div>
-                    <div className="total-ves">Bs. {totalVES.toLocaleString('es-VE', { minimumFractionDigits: 2 })}</div>
+            <footer className="totals-footer glass-panel" style={{ backgroundColor: 'var(--panel-bg)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                    <div>
+                        <div className="total-ves">Bs. {totalVES.toLocaleString('es-VE', { minimumFractionDigits: 2 })}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                        <div className="total-usd" style={{ color: 'var(--accent-color)' }}>${totalUSD.toFixed(2)} USD</div>
+                        <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>Total a pagar</div>
+                    </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                    <div className="total-usd" style={{ color: 'var(--accent-color)' }}>${totalUSD.toFixed(2)} USD</div>
-                    <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>Total a pagar</div>
-                </div>
+                <button
+                    className="primary"
+                    onClick={exportPDF}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                >
+                    <FileText size={18} /> Generar Reporte PDF
+                </button>
             </footer>
 
             <style>{`
