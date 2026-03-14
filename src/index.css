@@ -1,13 +1,13 @@
 :root {
-  --bg-color: #0f172a;
-  --panel-bg: rgba(30, 41, 59, 0.7);
-  --accent-color: #0ea5e9;
-  --accent-gold: #fbbf24;
-  --text-main: #f8fafc;
-  --text-dim: #94a3b8;
-  --glass-border: rgba(255, 255, 255, 0.1);
+  --bg-color: #f1f5f9;
+  --panel-bg: #ffffff;
+  --accent-color: #059669;
+  --accent-gold: #10b981;
+  --text-main: #0f172a;
+  --text-dim: #475569;
+  --glass-border: #cbd5e1;
   --danger: #ef4444;
-  --success: #22c55e;
+  --success: #059669;
 }
 
 * {
@@ -39,10 +39,11 @@ body {
   border-radius: 16px;
 }
 
-input, button {
-  background: rgba(255, 255, 255, 0.05);
+input,
+button {
+  background: var(--panel-bg);
   border: 1px solid var(--glass-border);
-  color: white;
+  color: var(--text-main);
   padding: 12px;
   border-radius: 8px;
   outline: none;
@@ -62,6 +63,7 @@ button {
 button.primary {
   background: var(--accent-color);
   border: none;
+  color: white;
 }
 
 button.primary:hover {
@@ -87,8 +89,13 @@ button.primary:hover {
   margin-top: 8px;
 }
 
-.rate-badge.syncing { color: var(--accent-gold); }
-.rate-badge.synced { color: var(--success); }
+.rate-badge.syncing {
+  color: var(--accent-gold);
+}
+
+.rate-badge.synced {
+  color: var(--success);
+}
 
 .container {
   max-width: 600px;
@@ -108,7 +115,10 @@ button.primary:hover {
   .product-form {
     grid-template-columns: 1fr 1fr;
   }
-  .form-name { grid-column: span 2; }
+
+  .form-name {
+    grid-column: span 2;
+  }
 }
 
 .product-list {
@@ -148,10 +158,25 @@ button.primary:hover {
   align-items: center;
 }
 
-.total-usd { font-size: 1.5rem; font-weight: 700; color: var(--accent-gold); }
-.total-ves { font-size: 1rem; color: var(--text-dim); }
+.total-usd {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+.total-ves {
+  font-size: 1rem;
+  color: var(--text-dim);
+}
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

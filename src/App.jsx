@@ -105,7 +105,7 @@ const App = () => {
                                 <span>{p.quantity} x ${p.priceUSD.toFixed(2)}</span>
                             </div>
                             <div className="product-price-total">
-                                <div style={{ color: 'var(--accent-gold)', fontWeight: 700 }}>
+                                <div style={{ color: 'var(--accent-color)', fontWeight: 700 }}>
                                     ${(p.priceUSD * p.quantity).toFixed(2)}
                                 </div>
                                 <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
@@ -128,12 +128,12 @@ const App = () => {
                 </div>
             </main>
 
-            <footer className="totals-footer glass-panel">
+            <footer className="totals-footer glass-panel" style={{ backgroundColor: 'var(--panel-bg)' }}>
                 <div>
                     <div className="total-ves">Bs. {totalVES.toLocaleString('es-VE', { minimumFractionDigits: 2 })}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                    <div className="total-usd">${totalUSD.toFixed(2)} USD</div>
+                    <div className="total-usd" style={{ color: 'var(--accent-color)' }}>${totalUSD.toFixed(2)} USD</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>Total a pagar</div>
                 </div>
             </footer>
